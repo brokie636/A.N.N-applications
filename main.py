@@ -1,5 +1,7 @@
+import os
 from tensorflow.keras.models import load_model
 from keras.losses import MeanSquaredError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
@@ -8,6 +10,15 @@ import uvicorn
 
 # Inicializar FastAPI
 app = FastAPI()
+
+# Configurar CORS para permitir todas las solicitudes
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permitir todos los orígenes
+    allow_credentials=True,
+    allow_methods=["*"],  # Permitir todos los métodos (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Permitir todos los encabezados
+)
 
 # Valores mínimos y máximos para desnormalizar
 min_sales = -4988.94
@@ -82,7 +93,7 @@ def predict_day(input_data: FeaturesInput):
     prediction = model.predict(X_input)[0, 0]
 
     # Desnormalizar predicción
-    prediction = prediction * (max_sales - min_sales) + min_sales
+    prediction = float(prediction * (max_sales - min_sales) + min_sales)
 
     return {"predicted_sales": prediction}
 
@@ -116,4 +127,5 @@ def predict_days(input_data: DaysInput):
 
 # Correr la API en modo local si el script se ejecuta directamente
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
