@@ -9,3 +9,4 @@ setuptools
 fastapi
 pydantic
 uvicorn
+python-multipart
