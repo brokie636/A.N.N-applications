@@ -25,13 +25,25 @@ app.add_middleware(
 min_sales = -4988.94
 max_sales = 693099.36
 sequence_length = 30
-model = load_model("demand_prediction/model/lstm_model.h5", custom_objects={"mse": MeanSquaredError()})
+model = load_model(
+    "demand_prediction/model/lstm_model.h5", custom_objects={"mse": MeanSquaredError()}
+)
 merged_df = pd.read_csv("./demand_prediction/dataset/merged_df.csv")
 
 features = [
-    "Temperature", "Fuel_Price", "MarkDown1", "MarkDown2", "MarkDown3",
-    "MarkDown4", "MarkDown5", "CPI", "Unemployment", "Size", "IsHoliday"
+    "Temperature",
+    "Fuel_Price",
+    "MarkDown1",
+    "MarkDown2",
+    "MarkDown3",
+    "MarkDown4",
+    "MarkDown5",
+    "CPI",
+    "Unemployment",
+    "Size",
+    "IsHoliday",
 ]
+
 
 class FeaturesInput(BaseModel):
     Temperature: float
@@ -46,23 +58,41 @@ class FeaturesInput(BaseModel):
     Size: int
     IsHoliday: int
 
+
 class DaysInput(BaseModel):
     days: int  # Número de días a predecir
 
+
 @app.post("/predict_day/")
 def predict_day(input_data: FeaturesInput):
-    X_input = np.array([[input_data.Temperature, input_data.Fuel_Price,
-                         input_data.MarkDown1, input_data.MarkDown2, input_data.MarkDown3,
-                         input_data.MarkDown4, input_data.MarkDown5, input_data.CPI,
-                         input_data.Unemployment, input_data.Size, input_data.IsHoliday]]).reshape(1, 1, -1)
+    X_input = np.array(
+        [
+            [
+                input_data.Temperature,
+                input_data.Fuel_Price,
+                input_data.MarkDown1,
+                input_data.MarkDown2,
+                input_data.MarkDown3,
+                input_data.MarkDown4,
+                input_data.MarkDown5,
+                input_data.CPI,
+                input_data.Unemployment,
+                input_data.Size,
+                input_data.IsHoliday,
+            ]
+        ]
+    ).reshape(1, 1, -1)
 
     prediction = model.predict(X_input)[0, 0]
     prediction = float(prediction * (max_sales - min_sales) + min_sales)
     return {"predicted_sales": prediction}
 
+
 @app.post("/predict_days/")
 def predict_days(input_data: DaysInput):
-    X_last_sequence = np.array(merged_df[features].iloc[-sequence_length:]).reshape(1, sequence_length, -1)
+    X_last_sequence = np.array(merged_df[features].iloc[-sequence_length:]).reshape(
+        1, sequence_length, -1
+    )
     future_predictions = []
 
     for _ in range(input_data.days):
@@ -71,7 +101,9 @@ def predict_days(input_data: DaysInput):
         X_last_sequence = np.roll(X_last_sequence, shift=-1, axis=1)
         X_last_sequence[0, -1, 0] = next_prediction
 
-    future_predictions = (np.array(future_predictions) * (max_sales - min_sales) + min_sales)
+    future_predictions = (
+        np.array(future_predictions) * (max_sales - min_sales) + min_sales
+    )
     return {"predicted_sales": future_predictions.tolist()}
 
 
@@ -97,10 +129,10 @@ async def predict_image(file: UploadFile = File(...)):
         with open(img_path, "wb") as f:
             f.write(await file.read())
 
-        classes = ["Jeans","Sofa","T-shirt","TV"]
+        classes = ["Jeans", "Sofa", "T-shirt", "TV"]
         img_array = load_and_preprocess_image(img_path, target_size=(128, 128))
         prediction = image_model.predict(img_array)
-        
+
         # Aquí puedes cambiar la lógica de salida según tu modelo
         predicted_class_index = np.argmax(prediction, axis=1).tolist()[0]
         predicted_class = classes[predicted_class_index]
@@ -109,7 +141,9 @@ async def predict_image(file: UploadFile = File(...)):
         return {"predicted_class": predicted_class}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error procesando la imagen: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error procesando la imagen: {str(e)}"
+        )
 
 
 # --- Correr la API ---
