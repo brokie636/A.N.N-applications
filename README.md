@@ -21,5 +21,5 @@ This backend exposes the following endpoints:
 - Demand Prediction: Predicts sales for a range of days (1 to 30) or for a specific day based on multiple features such as temperature, fuel price, discounts, CPI, unemployment rate, store size, and holiday status.
 - Product Classification: Classifies products based on uploaded images, helping organize inventory efficiently.
 
-You can check out the detailed blog post related to this project [here](https://www.notion.so/Aplicaciones-de-Redes-Neuronales-Artificiales-196da9d4b08880cf9c2debad99ae75cf)
-The backend is deployed and can be accessed at: https://predicciones-9fuy.onrender.com
+You can check out the detailed blog post related to this project [here](https://www.notion.so/Aplicaciones-de-Redes-Neuronales-Artificiales-196da9d4b08880cf9c2debad99ae75cf).
+The backend is deployed and can be accessed [here](https://predicciones-9fuy.onrender.com).
