@@ -112,7 +112,7 @@ image_model = load_model("product_image_prediction/model/modelo_entrenado.h5")
 print(image_model.input_shape)
 
 
-def load_and_preprocess_image(img_path, target_size=(128, 128)):
+def load_and_preprocess_image(img_path, target_size=(224, 224)):
     img = image.load_img(img_path, target_size=target_size)  # Redimensionar la imagen
     img_array = image.img_to_array(img) / 255.0  # Normalizar al rango [0, 1]
     img_array = np.expand_dims(img_array, axis=0)  # Añadir dimensión del batch
@@ -130,7 +130,7 @@ async def predict_image(file: UploadFile = File(...)):
             f.write(await file.read())
 
         classes = ["Jeans", "Sofa", "T-shirt", "TV"]
-        img_array = load_and_preprocess_image(img_path, target_size=(128, 128))
+        img_array = load_and_preprocess_image(img_path, target_size=(224, 224))
         prediction = image_model.predict(img_array)
 
         # Aquí puedes cambiar la lógica de salida según tu modelo
